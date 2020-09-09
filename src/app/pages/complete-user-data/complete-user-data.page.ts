@@ -11,6 +11,7 @@ import { Crop } from '@ionic-native/crop/ngx';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { AuthService } from 'src/app/services/auth.service';
 import { OneSignal } from '@ionic-native/onesignal/ngx';
+import { NotificationsService } from 'src/app/services/notifications.service';
 
 @Component({
   selector: 'app-complete-user-data',
@@ -38,7 +39,7 @@ export class CompleteUserDataPage implements OnInit {
               private crop: Crop,        
               private storage: AngularFireStorage,
               private authService: AuthService,
-              private onesignal: OneSignal) {
+              private notifications: NotificationsService) {
 
   
      }
@@ -56,9 +57,15 @@ export class CompleteUserDataPage implements OnInit {
 
 
   
-    loadCloudFiles(uid) {
-    
-      const storageRef = firebase.storage().ref(uid)
+    async loadCloudFiles(id) {
+      let loader = await this.loadingCtrl.create({
+        message: "Por favor espere...",
+      });
+  
+      loader.present();
+  
+      try{
+      const storageRef = firebase.storage().ref(id)
       storageRef.listAll().then(result => {
         result.items.forEach(async ref => {
           this.cloudFiles.push({
@@ -66,14 +73,17 @@ export class CompleteUserDataPage implements OnInit {
             full: ref.fullPath,
             url: await ref.getDownloadURL(),
             ref: ref
-          });             
-       this.user.photo = await ref.getDownloadURL();        
-        
+          });
+          this.user.photo = await ref.getDownloadURL();
         });
+        loader.dismiss(); 
       });
     }
-
-
+    catch(e){
+      loader.dismiss();
+      this.showToast(e);
+    }
+    }
   
 
     chooseImage(){
@@ -107,13 +117,11 @@ export class CompleteUserDataPage implements OnInit {
       task.snapshotChanges().subscribe(snap =>{
         this.percent = ((snap.bytesTransferred/snap.totalBytes)*100).toString().split(".")[0];     
         task.then(async () => {                   
-          this.isUploadStart = false;
-          this.showToast('Imagen cargada con éxito, guarda los cambios para actualizar tu perfil');                  
-        }).then(()=>{
+          this.isUploadStart = false;        
           this.loadCloudFiles(this.uid);
-        })  
-  
-      })
+          this.showToast('Imagen cargada con éxito');  
+     })  
+   })
     }
   
   
@@ -130,11 +138,11 @@ export class CompleteUserDataPage implements OnInit {
          if(!this.user.photo){
         await this.firestore.doc('users/' + this.uid).set({
           name: this.user.name,
-          email: this.user.email,
-          onWait: false,
+          email: this.user.email,      
           address: this.user.address,
-          phonenumber: this.user.phonenumber,
-          orders: 0,
+          phonenumber: this.user.phonenumber, 
+          notifications: 0,
+          purchases: 0,     
           token: '',
           photo: '' 
         });
@@ -143,17 +151,19 @@ export class CompleteUserDataPage implements OnInit {
       if(this.user.photo){
         await this.firestore.doc('users/' + this.uid).set({
           name: this.user.name,
-          email: this.user.email,
-          onWait: false,
+          email: this.user.email,         
           address: this.user.address,
           phonenumber: this.user.phonenumber,
-          orders: 0,
+          notifications: 0,   
+          purchases: 0,      
           token: '',
           photo: this.user.photo 
         });
       }
 
-
+      await this.firestore.doc('roles/' + this.uid).set({
+         role: 'user'
+      });
 
         await this.auth.auth.currentUser.updateProfile({
           displayName: this.user.name
@@ -162,10 +172,12 @@ export class CompleteUserDataPage implements OnInit {
       }catch(e){
        this.showToast(e);
       }  
-      (await loader).dismiss();      
-      this.navCtrl.navigateRoot('delivery-panel');
-  
-  
+      (await loader).dismiss();   
+
+      this.navCtrl.navigateRoot('store-home');
+      this.showToast('Bienvenido,' + ' ' + this.user.name);
+      this.notifications.NewUser(this.uid, this.user.name);
+
       }
   
   
@@ -176,13 +188,8 @@ export class CompleteUserDataPage implements OnInit {
         this.showToast('Introduzca un nombre');
         return false;
       }
-
-  
-      if(!this.user.name){
-        this.showToast('Introduzca un nombre');
-        return false;
-      }
-
+ 
+    
       if (!this.user.phonenumber) {
         this.showToast('Introduzca un número de teléfono');
         return false;
@@ -207,11 +214,12 @@ export class CompleteUserDataPage implements OnInit {
     }
   
   
-    showToast(message: string){
-     this.toastCtrl.create({
-       message: message,
-       duration: 3000
-     }).then(toastData => toastData.present());
+    showToast(message: string) {
+      this.toastCtrl.create({
+        cssClass: 'toast',
+        message: message,
+        duration: 800
+      }).then(toastData => toastData.present());
     }
 
 }

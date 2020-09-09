@@ -1,12 +1,13 @@
 import { Product } from '../../models/models.model'; 
 import { Component, OnInit } from '@angular/core';
-import { AlertController, LoadingController, ToastController} from '@ionic/angular';
+import { AlertController, LoadingController, ToastController, ActionSheetController, ModalController} from '@ionic/angular';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { NotificationsService } from 'src/app/services/notifications.service';
-
+import { AuthService } from 'src/app/services/auth.service';
+import { ClientDataModalPage } from "../client-data-modal/client-data-modal.page";
 
 @Component({
   selector: 'app-user-sale-detail',
@@ -14,7 +15,7 @@ import { NotificationsService } from 'src/app/services/notifications.service';
   styleUrls: ['./user-sale-detail.page.scss'],
 })
 export class UserSaleDetailPage implements OnInit {
-
+  
   cart: Product[] = [];
   idDate: any;  
   sales: any;
@@ -29,7 +30,6 @@ export class UserSaleDetailPage implements OnInit {
   role: any;
   roleAdmin = 'admin';
   token: any;
-  revisionSale = 'En Revisión'
   status:any;
   delivered: any;
   done = 'Si';
@@ -43,63 +43,90 @@ export class UserSaleDetailPage implements OnInit {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private iab: InAppBrowser,
-    private notifications: NotificationsService) { 
-      this.uid = this.auth.auth.currentUser.uid;
+    private authService: AuthService,
+    private notifications: NotificationsService,
+    private actionSheetCtrl: ActionSheetController,
+    private router: Router,
+    private modalCtrl: ModalController) { 
+
       this.idDate = this.actRoute.snapshot.paramMap.get('idDate');
 
     }
 
   ngOnInit() {
-    this.getSaleById();  
+  
+    this.authService.getUserAuth().subscribe(u =>{
+      this.uid = u.uid
+    })  
        
   }
 
-  ionViewDidEnter(){
+  ionViewDidEnter(){  
+  this.getSaleById();  
    this.getUserRole(this.uid); 
    this.getDeliveryToken(this.deliveryId);
   }
+
+  doRefresh(event){
+    setTimeout(()=>{
+    this.ionViewDidEnter();
+    event.target.complete();
+    }, 500)
+      }
 
   payment(url) {
     this.iab.create(url);
   }
 
 
-  async confirmVerify(id, token) {
-    const alert = await this.alertCtrl.create({
+  async saleOptionsNoDelivered(id) {
+    const actionSheet = await this.actionSheetCtrl.create({ 
+      header: 'Opciones', 
       cssClass: 'my-custom-class',
-      header: '¿Quieres verificar esta compra?',
-      message: '<div class="ion-text-justify">El pago de esta compra será verificado para completar el pedido del cliente</div>',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          cssClass: 'secondary'         
-        }, {
-          text: 'Aceptar',
+      buttons: [      
+        {      
+          text: 'Pedido Recibido',
+          icon: 'checkmark-circle-outline',
+          cssClass: 'blue',    
           handler: () => {
-            this.verfifySale(id, token)
-          }
+            this.confirmDelivered(id);
+          }       
+        },          
+        {
+        text: 'Delivery',
+        icon: 'person-circle-outline' ,
+        cssClass: 'blue',    
+        handler: () => {        
+            this.deliveryProfile()         
         }
-      ]
+      }]
     });
-
-    await alert.present();
+    await actionSheet.present();
   }
 
-
-  verfifySale(id, token) {
-    this.firestore.collection('sales').doc(id).update({
-      status: 'Verificada'
-    })
-   this.notifications.SaleVerify(id, token)
-    this.showToast('La venta ha sido verificada, ya puedes completar el pedido del cliente');   
+  async saleOptionsDelivered() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Opciones',
+      cssClass: 'my-custom-class',
+      buttons: [                
+        {
+        text: 'Delivery',
+        icon: 'person-circle-outline' ,
+        cssClass: 'blue',    
+        handler: () => {        
+            this.deliveryProfile()         
+        }
+      }]
+    });
+    await actionSheet.present();
   }
+  
 
   saleDelivered(id) {
     this.firestore.collection('sales').doc(id).update({
       delivered: 'Si'
     })
-    this.notifications.orderDelivered(this.deliveryToken)
+  
     this.showToast('Gracias por comprar'); 
   }
 
@@ -151,7 +178,6 @@ export class UserSaleDetailPage implements OnInit {
     this.cart = data['products'];
     this.total = data['total'];
     this.token  = data['token'];
-    this.dolarTotal = data['dolarTotal'];
     this.img = data['img'];
     this.status = data['status'];
     this.delivered = data['delivered'];
@@ -159,6 +185,23 @@ export class UserSaleDetailPage implements OnInit {
     this.content = data; 
    });
   
+  }
+
+  async deliveryProfile() {
+    if(this.deliveryId !== 'No Asignado'){
+ const modal = await this.modalCtrl.create({
+      component: ClientDataModalPage,
+      cssClass: 'profile-modal',
+      componentProps: {
+        'id': this.deliveryId,       
+      }
+    })
+    return await modal.present();
+    }else{
+      this.showToast('No hay un delivery asignado para este pedido todavía.')
+    }
+   
+
   }
 
   showToast(message: string) {

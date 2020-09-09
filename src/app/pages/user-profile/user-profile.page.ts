@@ -24,7 +24,7 @@ export class UserProfilePage implements OnInit {
   profileimg = this.user.photo;
   address = this.user.address;
   newMessage: BehaviorSubject<number>;
-   
+  sales;
 
   constructor(private actRoute: ActivatedRoute,
     private loadingCtrl: LoadingController,
@@ -48,7 +48,48 @@ export class UserProfilePage implements OnInit {
     }
 
   ionViewDidEnter(){
+    this.getSales();
     this.getProfile(this.uid);
+  }
+
+  doRefresh(event){
+    setTimeout(()=>{
+    this.ionViewDidEnter();
+    event.target.complete();
+    }, 500)
+      }
+
+  storeHome(){
+    this.router.navigate(['store-home']);
+  }
+
+  async getSales() {
+    let loader = await this.loadingCtrl.create({
+      message: "Por favor espere...",
+    });
+
+    loader.present();
+    try{
+   this.firestore.collection('sales', ref => ref.where('client', '==', this.uid)
+      .orderBy('date', 'desc'))
+      .snapshotChanges()
+      .subscribe(data => {
+        this.sales = data.map(e => {
+          return {           
+            products: e.payload.doc.data()['products'],
+            total: e.payload.doc.data()['total'],
+            client: e.payload.doc.data()['client'],
+            date: e.payload.doc.data()['date'],
+            delivered: e.payload.doc.data()['delivered'], 
+            status: e.payload.doc.data()['status']            
+          }
+        })
+        loader.dismiss();
+      });  
+    }catch(e){
+      console.log(e);
+    }
+   
   }
 
   async getProfile(uid: string) {
@@ -66,6 +107,7 @@ export class UserProfilePage implements OnInit {
         this.user.address = data['address'];
         this.user.photo = data['photo']
         this.user.phonenumber = data['phonenumber'];
+        this.user.notifications = data['notifications'];
       });
 
     (await loader).dismiss();

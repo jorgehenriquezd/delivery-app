@@ -8,55 +8,36 @@ export interface User {
     address: string;  
     email: string;   
     phonenumber: string;
+    notifications: number;
     role: string;
     token: string;
 }
 
-export interface Dolar{
-    value: number;
-    
+export interface New {
+   id: string;
+   name: string;
+   img: string;
+   
 }
 
 export interface Product{
     id: string;
-    img: string;
-    name: string;   
+    img: string;    
+    name: string; 
+    category: string;  
+    categoryName: string;
     price: number;
-    amount: number;  
-    
+    amount: number;
+        
 }
 
 export interface Category{
+    id: string;
     name: string,
     description: string,
-    img: string,
-    product: [{
-      
-        img: string;
-        name: string;
-        category: string;
-        price: number;
-        amount: number;         
-    }]      
+    img: string      
 }
 
-export interface Chat{
-    id: string;
-    chatrole: any;
-    creatorid: any;
-    creatorname: any;
-    creatorphoto: any;
-    userid: any;    
-    username: any;
-    userphoto: any;         
-    message: [
-        {
-            content: string;
-            date: Date;            
-            sender: string;
-        }
-    ]
-}
 
 export interface Message {
     content: string;

@@ -50,12 +50,17 @@ export class UserEditProfilePage implements OnInit {
 
   ionViewDidEnter() {
     this.getUserById(this.uid);
-    this.loadCloudFiles();
   }
 
-  loadCloudFiles() {
+  async loadCloudFiles(id) {
+    let loader = await this.loadingCtrl.create({
+      message: "Por favor espere...",
+    });
 
-    const storageRef = firebase.storage().ref(this.uid)
+    loader.present();
+
+    try{
+    const storageRef = firebase.storage().ref(id)
     storageRef.listAll().then(result => {
       result.items.forEach(async ref => {
         this.cloudFiles.push({
@@ -66,9 +71,14 @@ export class UserEditProfilePage implements OnInit {
         });
         this.user.photo = await ref.getDownloadURL();
       });
+      loader.dismiss(); 
     });
   }
-
+  catch(e){
+    loader.dismiss();
+    this.showToast(e);
+  }
+  }
 
   async getUserById(uid: string) {
     let loader = this.loadingCtrl.create({
@@ -83,6 +93,7 @@ export class UserEditProfilePage implements OnInit {
       .valueChanges()
       .subscribe(data => {
         this.user.name = data['name'];
+        this.user.photo = data['photo'];
         this.user.address = data['address'];
         this.user.phonenumber = data['phonenumber'];
       });
@@ -121,13 +132,11 @@ export class UserEditProfilePage implements OnInit {
     task.snapshotChanges().subscribe(snap => {
       this.percent = ((snap.bytesTransferred / snap.totalBytes) * 100).toString().split(".")[0];
       task.then(async () => {
-        this.isUploadStart = false;
-        this.showToast('Imagen cargada con éxito, guarda los cambios para actualizar tu perfil');
-      }).then(() => {
-        this.loadCloudFiles();
-      })
-
-    })
+        this.isUploadStart = false;        
+        this.loadCloudFiles(this.uid);
+        this.showToast('Imagen cargada con éxito');  
+   })  
+ })
   }
 
 
@@ -141,19 +150,20 @@ export class UserEditProfilePage implements OnInit {
 
 
       try {
-        await this.firestore.doc('users/' + this.uid).update({
+        if(!this.user.photo){
+          await this.firestore.doc('users/' + this.uid).update({
           name: this.user.name,
           address: this.user.address,
-          phonenumber: this.user.phonenumber
+          phonenumber: this.user.phonenumber          
         });
-
-        if (this.user.photo) {
+        }else{
           await this.firestore.doc('users/' + this.uid).update({
-            photo: this.user.photo
+            name: this.user.name,
+            address: this.user.address,
+            phonenumber: this.user.phonenumber,
+            photo: this.user.photo          
           });
-        } else {
-          console.log('null')
-        }
+        }  
 
       } catch (e) {
         this.showToast(e);
@@ -198,7 +208,7 @@ export class UserEditProfilePage implements OnInit {
   showToast(message: string) {
     this.toastCtrl.create({
       message: message,
-      duration: 3000
+      duration: 1500
     }).then(toastData => toastData.present());
   }
 

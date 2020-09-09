@@ -26,9 +26,7 @@ export class LoginPage implements OnInit {
   password: any;
   confirmPassword: any;
 
-  loader = this.loadingCtrl.create({
-    message: "Por favor espere...",
-  });
+  
   constructor(private authService: AuthService,
     private router: Router,
     private afAuth: AngularFireAuth,
@@ -47,10 +45,6 @@ export class LoginPage implements OnInit {
   }
 
 
-
-  prueba() {
-    this.notifications.token()
-  }
 
   async createUser() {
 
@@ -108,7 +102,7 @@ export class LoginPage implements OnInit {
         await this.afAuth.auth
           .createUserWithEmailAndPassword(this.email, this.password)
 
-        this.notifications.NewUser(this.uid, this.name);
+
         this.router.navigate(['/complete-user-data']);
         this.menuCtrl.enable(true)
       } catch (e) {
@@ -137,7 +131,7 @@ export class LoginPage implements OnInit {
         await this.afAuth.auth.signInWithEmailAndPassword(this.email, this.password)
           .then(res => {
             console.log(res);
-            this.router.navigate(['delivery-panel'])
+            this.router.navigate(['store-home'])
 
             const name = res.user.displayName
 
@@ -164,14 +158,14 @@ export class LoginPage implements OnInit {
 
         if (this.new == true) {
 
-          this.notifications.NewUser(this.uid, this.name);
+         
           this.router.navigate(['/complete-user-data']);
           this.menuCtrl.enable(true)
 
         } else {
 
           this.menuCtrl.enable(true)
-          this.router.navigate(['/delivery-panel']).then(() => {
+          this.router.navigate(['/store-home']).then(() => {
             this.showToast('Bienvenido ' + this.name)
           })
 
@@ -194,15 +188,14 @@ export class LoginPage implements OnInit {
         this.uid = res.user.uid
 
         if (this.new == true) {
-
-          this.notifications.NewUser(this.uid, this.name);
+         
           this.router.navigate(['/complete-user-data']);
           this.menuCtrl.enable(true)
 
         } else {
 
           this.menuCtrl.enable(true)
-          this.router.navigate(['/delivery-panel']).then(() => {
+          this.router.navigate(['/store-home']).then(() => {
             this.showToast('Bienvenido ' + this.name)
           })
 
@@ -267,8 +260,9 @@ export class LoginPage implements OnInit {
 
   showToast(message: string) {
     this.toastCtrl.create({
+      cssClass: 'toast',
       message: message,
-      duration: 2500
+      duration: 800
     }).then(toastData => toastData.present());
   }
 

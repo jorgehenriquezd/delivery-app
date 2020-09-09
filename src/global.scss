@@ -24,9 +24,17 @@
 @import "~@ionic/angular/css/text-alignment.css";
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
+@import '~animate.css/animate.min.css';
 
 .danger .sc-ion-action-sheet-md{
     color: red !important;
+}
+
+.toast{
+  --background: #0575E6;  /* fallback for old browsers */
+  --background: -webkit-linear-gradient(to right, #012bc2, #0575E6);  /* Chrome 10-25, Safari 5.1-6 */
+ --background: linear-gradient(to right, #012bc2, #0575E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
 }
 
 .blue .sc-ion-action-sheet-md{
@@ -38,6 +46,13 @@
     --border-radius: 10px;
     padding: 50px;
   }
+
+  
+.cart-modal {
+  --height: 90%;
+  --border-radius: 10px;
+  padding: 15px;
+}
 
   .profile-modal {
     --height: 76%;

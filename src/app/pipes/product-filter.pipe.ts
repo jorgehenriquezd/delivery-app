@@ -13,7 +13,9 @@ export class ProductFilterPipe implements PipeTransform {
     texto = texto.toLocaleLowerCase();
 
     return products.filter(product => {
-      return   product.name.toLocaleLowerCase().includes(texto);
+       
+      return  product.categoryName.toLocaleLowerCase().includes(texto) ||
+              product.name.toLocaleLowerCase().includes(texto);
     });
   }
 }

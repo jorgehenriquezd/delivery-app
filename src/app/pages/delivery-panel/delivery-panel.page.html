@@ -44,7 +44,7 @@
             <ion-card class="ion-text-center background">
               <ion-card-header>
 
-                <div (click)="confirmTakeSale(sale.date, sale.client)" class="ion-activatable ripple-parent">
+                <div (click)="confirmTakeSale(sale.date, sale.client, user.name, sale.clientToken)" class="ion-activatable ripple-parent">
 
                   <img class="ion-no-padding" src="../../../assets/img/deliverywait.png" alt="">
                   <ion-ripple-effect type="unbounded"></ion-ripple-effect>
@@ -82,12 +82,11 @@
           <ion-col size="6" *ngFor="let sale of myDelivery">
             <ion-card class="ion-text-center background">
               <ion-card-header>
-                <img *ngIf="sale.delivered == 'No'" src="../../../assets/img/delivery_iconwait.png" alt="">
+                <img *ngIf="sale.delivered == 'En Proceso'" src="../../../assets/img/delivery_iconwait.png" alt="">
                 <img *ngIf="sale.delivered == 'Si'" src="../../../assets/img/delivery_icon_ready.png" alt="">
                 <br>
 
-                <div style="font-size: 16px;color: rgb(92, 92, 92);" class="pb-1">
-                  Entregado: {{sale.delivered}} <br>
+                <div style="font-size: 16px;color: rgb(92, 92, 92);" class="pb-1">                
                   <ion-icon name="calendar-outline"></ion-icon> {{sale.date | date:'dd/MM/yyyy'}} <br>
                   <ion-icon name="time-outline"></ion-icon> {{sale.date| date:'shortTime'}}
                 </div>
@@ -100,9 +99,10 @@
                 </ion-button>
 
 
-               <ion-button color="tertiary" expand="block" [routerLink]="['/user-sale-detail/', sale.date]"
+             <ion-button class="order" expand="block" [routerLink]="['/user-sale-detail/', sale.date]"
                   size="small" shape="round">
-                  <ion-icon name="eye"></ion-icon>
+                  <div style="font-size: 12px;color: white;">Pedido</div>
+                  <ion-icon slot="end" name="cart"></ion-icon>
                 </ion-button>
               </ion-card-content>
             </ion-card>

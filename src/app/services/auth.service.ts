@@ -26,6 +26,8 @@ export class AuthService {
       this.facebook.logout();
       this.google.disconnect();
       this.router.navigate(['login']);      
+    }).then(()=>{
+      window.location.reload(); 
     })
   }
 

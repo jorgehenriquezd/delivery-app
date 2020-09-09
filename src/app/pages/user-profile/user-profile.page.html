@@ -2,7 +2,9 @@
   <ion-toolbar>
 
     <ion-buttons slot="start">
-      <ion-menu-button color="light" menuId="main-menu"></ion-menu-button>
+      <ion-menu-button color="light" menu="main-menu">        
+      </ion-menu-button>
+      <ion-badge *ngIf="user.notifications > 0" class="notifications-badge" color="danger">{{user.notifications}} </ion-badge>
     </ion-buttons>
     <ion-title>
       <div style="font-size: 18px;color: rgb(255, 255, 255);">Perfil
@@ -16,10 +18,15 @@
 
 </ion-header>
 <ion-content>
+<ion-content >
+        <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+          <ion-refresher-content></ion-refresher-content>
+        </ion-refresher>
 
-  <ion-card class="ion-no-margin">
+  <ion-card class="background ion-no-margin">
 
     <ion-card-content>
+     
 
       <div class="ion-text-center">
 
@@ -79,7 +86,45 @@
 
   </ion-card>
  
+  <ion-card class="card-background ion-no-margin ion-text-center"> 
+    <ion-label class="ion-padding">
+      <h1>
+    <ion-icon class="cart-icon" name="cart"></ion-icon>⠀⠀Compras    
+    </h1></ion-label>
+  </ion-card>
 
+      <ion-grid *ngIf="sales && sales.length > 0" fixed>
+        <ion-row>
+          <ion-col size="6" *ngFor="let sale of sales">
+            <ion-card class="ion-text-center background">
+              <ion-card-header>
+                <img *ngIf="sale.delivered == 'No'" src="../../../assets/img/delivery_iconwait.png" alt="">
+                <img *ngIf="sale.delivered == 'Si'" src="../../../assets/img/delivery_icon_ready.png" alt="">
+                <br>
+
+                <div style="font-size: 16px;color: rgb(92, 92, 92);" class="pb-1">
+                  Entregado: {{sale.delivered}} <br>
+                  <ion-icon name="calendar-outline"></ion-icon> {{sale.date | date:'dd/MM/yyyy'}} <br>
+                  <ion-icon name="time-outline"></ion-icon> {{sale.date| date:'shortTime'}}
+                </div>
+
+              </ion-card-header>
+              <ion-card-content>     
+               <ion-button class="butn" expand="block" [routerLink]="['/user-sale-detail/', sale.date]"
+                  size="small" shape="round">              
+                  <ion-icon slot="end" name="document-text"></ion-icon>
+                </ion-button>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <div *ngIf="sales && sales.length == 0" class="ion-no-padding ion-text-center">
+        <br><br>
+        <img src="../../../assets/img/nopurchases.jpg" height="350px" width="350px" alt="">
+      </div>
+    
 
 </ion-content>
 

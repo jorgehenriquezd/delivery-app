@@ -31,12 +31,12 @@ import { ImagePicker } from '@ionic-native/image-picker/ngx';
 import { File } from '@ionic-native/File/ngx';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faMoneyCheckAlt, faBalanceScale, faStore, faUsers,  faTruck, faUserShield } from "@fortawesome/free-solid-svg-icons";
+import { faMoneyCheckAlt, faBalanceScale, faStore, faUsers,  faTruck, faUserShield, faCartArrowDown, faPercent, faCartPlus } from "@fortawesome/free-solid-svg-icons";
 import { PayPal } from '@ionic-native/paypal/ngx';
 import { Badge } from '@ionic-native/badge/ngx';
 
 
-library.add(faMoneyCheckAlt, faBalanceScale, faStore, faUsers, faTruck, faUserShield)
+library.add(faMoneyCheckAlt, faBalanceScale, faStore, faUsers, faTruck, faUserShield, faCartArrowDown, faPercent, faCartPlus)
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -47,8 +47,6 @@ library.add(faMoneyCheckAlt, faBalanceScale, faStore, faUsers, faTruck, faUserSh
             AngularFireStorageModule,
             HttpClientModule, FontAwesomeModule],
   providers: [
-
-
     DatePipe,
     OneSignal,
     Badge,

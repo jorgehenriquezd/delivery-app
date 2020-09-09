@@ -1,17 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { Platform, AlertController, LoadingController } from '@ionic/angular';
+import { Platform, AlertController, LoadingController, MenuController, ToastController, ModalController } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { OneSignal } from "@ionic-native/onesignal/ngx";
 import { NotificationsService } from "./services/notifications.service";
-import {AuthService } from "./services/auth.service";
+import { AuthService } from "./services/auth.service";
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { User } from "./models/models.model";
-import { faTruck } from "@fortawesome/free-solid-svg-icons";
+import { faTruck, faStore, faUserShield } from "@fortawesome/free-solid-svg-icons";
 import Swal from 'sweetalert2'
+import { CartService } from './services/cart.service';
+import { StoreCartModalPage } from './pages/store-cart-modal/store-cart-modal.page';
 
 @Component({
   selector: 'app-root',
@@ -20,13 +22,15 @@ import Swal from 'sweetalert2'
 })
 export class AppComponent {
   user = {} as User
-  newMessage: BehaviorSubject<number>;
+  cartItemCount: BehaviorSubject<number>;
   isLogged;
-  uid; 
+  uid;
   faTruck = faTruck;
+  faStore = faStore;
+  faUserShield = faUserShield;
   orders;
   reload: boolean;
-
+  notificationsCounter;
   constructor(
     private platform: Platform,
     private splashScreen: SplashScreen,
@@ -36,9 +40,13 @@ export class AppComponent {
     private notifications: NotificationsService,
     private router: Router,
     private authService: AuthService,
-    private firestore: AngularFirestore,   
+    private firestore: AngularFirestore,
     private auth: AngularFireAuth,
-    private loadingCtrl: LoadingController 
+    private loadingCtrl: LoadingController,
+    private menuCtrl: MenuController,
+    private toastCtrl: ToastController,
+    private cartService: CartService,
+    private modalCtrl: ModalController,
 
   ) {
 
@@ -50,34 +58,42 @@ export class AppComponent {
       this.statusBar.show();
       this.splashScreen.hide();
 
-      this.authService.getUserAuth().subscribe(u =>{
-        this.uid = u.uid         
-      })  
+      this.authService.getUserAuth().subscribe(u => {
+        this.uid = u.uid
+      })
 
-      
+      this.cartItemCount = this.cartService.getCartItemCount();
 
       setTimeout(() => {
         this.getUserProfile(this.uid)
       }, 2000);
 
-      this.newMessage = this.notifications.newBadgeMessage();
+      
 
       if (this.platform.is('cordova')) {
-        this.setupPush();     
-       }
+        this.setupPush();
+      }
 
     })
   }
 
-  refresh(){
+
+
+  refresh() {
     this.reload = true;
-    this.initializeApp();
+    try {
+      this.initializeApp();
+    } catch (e) {
+      this.showToast('No tienes conexión a internet en este momento.')
+    }
+
+
     setTimeout(() => {
       this.reload = false;
     }, 3000);
   }
 
- async getUserProfile(uid: string) {
+  async getUserProfile(uid: string) {
     let loader = this.loadingCtrl.create({
       message: "Por favor espere...",
 
@@ -87,10 +103,18 @@ export class AppComponent {
       .valueChanges()
       .subscribe(data => {
         this.user.name = data['name']
-        this.user.photo = data['photo']        
+        this.user.photo = data['photo']
         this.orders = data['orders']
+        this.user.notifications = data['notifications'],
+          this.user.token = data['token']
       });
-      (await loader).dismiss();
+
+    this.firestore.doc('roles/' + uid)
+      .valueChanges()
+      .subscribe(data => {
+        this.user.role = data['role'];
+      });
+    (await loader).dismiss();
   }
 
 
@@ -116,8 +140,49 @@ export class AppComponent {
     await alert.present();
   }
 
-  logout(){
-    this.authService.logout();
+  logout() {
+    this.authService.logout(); 
+    this.RemoveTopics();
+  }
+
+  NewUserNotification(id, title) {
+
+    Swal.fire({
+      confirmButtonText: 'Ver Perfil',
+      title: title,     
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      }
+    }).then(() => {
+      this.router.navigate(['admin-user-profile', id])
+    })
+  }
+
+  NewSaleNotification(id, title, msg) {
+
+    Swal.fire({
+      confirmButtonText: 'Ver Compra',
+      title: title,
+      text: msg,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      }
+    }).then(() => {
+      this.router.navigate(['user-sale-detail', id])
+    })
+  }
+
+  NewTakenNotification(id, title) {
+
+    Swal.fire({
+      confirmButtonText: 'Ver Pedido',
+      title: title,      
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      }
+    }).then(() => {
+      this.router.navigate(['user-sale-detail', id])
+    })
   }
 
   setupPush() {
@@ -130,86 +195,87 @@ export class AppComponent {
       let title = data.payload.title;
       let additionalData = data.payload.additionalData;
 
-      if (additionalData.messagecreator) {
-        this.newMessage.next(this.newMessage.value + 1);
-        this.router.navigate(['chat-user', additionalData.chatId]);      
+      if (additionalData.userid) {
+        this.NewUserNotification(additionalData.userid, title);
       }
 
-      if (additionalData.messageuser) {
-        this.newMessage.next(this.newMessage.value + 1);
-        this.router.navigate(['chat-creator', additionalData.chatId]);
+      if (additionalData.saleid) {
+        this.NewSaleNotification(additionalData.saleid, title, msg);
       }
 
-
-      if (additionalData.userid) {       
-        this.router.navigate(['admin-user-profile', additionalData.userid]);
-      }
-
-      if (additionalData.delivered) {       
-        this.sweetAlert(title,msg)
+      if (additionalData.takenid) {
+        this.NewTakenNotification(additionalData.takenid, title);
       }
 
     });
 
-    this.onesignal.handleNotificationOpened().subscribe(data =>{
+    this.onesignal.handleNotificationOpened().subscribe(data => {
       let msg = data.notification.payload.body;
       let title = data.notification.payload.title;
       let additionalData = data.notification.payload.additionalData;
 
-      if (additionalData.delivered) {       
-        this.sweetAlert(title,msg)
+      if (additionalData.saleid) {
+        this.NewSaleNotification(additionalData.saleid, title, msg);
+      }
+
+      if (additionalData.userid) {
+        this.NewUserNotification(additionalData.userid, title);
+      }
+
+      if (additionalData.takenid) {
+        this.NewTakenNotification(additionalData.takenid, title);
       }
     })
 
     this.onesignal.endInit();
   }
 
-  async building() {
-    const alert = await this.alertController.create({
-      cssClass: 'my-custom-class',
-      header: 'Módulo en construcción',   
-      buttons: [
-        {
-          text: 'Cerrar',
-          handler: () => {
-  
-          }
-        }
-      ]
+  adminTopics() {
+    this.onesignal.sendTags({
+      admin: 'si',
     });
-
-    await alert.present();
   }
 
-  async updateOnWait(){ 
-
-    let loader =  this.loadingCtrl.create({
-      message: "Por favor espere...",
-  
-    });
-   (await loader).present();
-    try{ 
-    this.firestore.collection('users').doc(this.uid).update({
-      onWait: false
-    }); 
-  }catch(e){
-    alert(e);
-  }
-  (await loader).dismiss();
-
-  }
- 
-  sweetAlert(title, msg){
-    Swal.fire({
-      position: 'center',
-      icon: 'success',
-      title: title,
-      text: msg,
-      showConfirmButton: false,
-      timer: 2000
-    }).then(()=>{
-      this.updateOnWait()
+  RemoveTopics(){
+    this.onesignal.getTags().then(tags=>{
+      alert(JSON.stringify(tags))
+      if(tags.admin === "si")
+      this.onesignal.sendTag("admin","no");
     })
+  }
+
+  async resetNotifications() {
+
+    let loader = this.loadingCtrl.create({
+      message: "Por favor espere...",
+
+    });
+    (await loader).present();
+    try {
+      this.firestore.collection('users').doc(this.uid).update({
+        notifications: 0
+      });
+    } catch (e) {
+      alert(e);
+    }
+    (await loader).dismiss();
+
+  }
+
+  async openCart() {
+    this.menuCtrl.close();
+    let modal = await this.modalCtrl.create({
+      component: StoreCartModalPage,
+      cssClass: 'cart-modal'
+    });
+    modal.present();
+  }
+
+  showToast(message: string) {
+    this.toastCtrl.create({
+      message: message,
+      duration: 1200
+    }).then(toastData => toastData.present());
   }
 
 }

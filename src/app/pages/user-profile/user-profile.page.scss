@@ -29,6 +29,22 @@
     
   }
   
+  .butn{
+    --background: #0575E6;  /* fallback for old browsers */
+    --background: -webkit-linear-gradient(to right, #012bc2, #0575E6);  /* Chrome 10-25, Safari 5.1-6 */
+   --background: linear-gradient(to right, #012bc2, #0575E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    
+  }
+
+  .notifications-badge {
+ 
+    font-size: 11px;
+    position: absolute;
+    top: 9px;
+    right: 3px;
+
+}
+
   ion-toolbar{
     --background: #0575E6;  /* fallback for old browsers */
     --background: -webkit-linear-gradient(to right, #012bc2, #0575E6);  /* Chrome 10-25, Safari 5.1-6 */
@@ -37,15 +53,31 @@
  }
 
 
-
- ion-tab-bar{
-  --background: #4A00E0; 
-
-}
-
 .update{ 
   --background: #0575E6;  /* fallback for old browsers */
   --background: -webkit-linear-gradient(to right, #012bc2, #0575E6);  /* Chrome 10-25, Safari 5.1-6 */
  --background: linear-gradient(to right, #012bc2, #0575E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   
+  }
+
+  ion-item{
+    --background: transparent;
+  }
+  
+  ion-card.card-background{
+    --background: url(../../../assets/img/barbg2.jpg) 0 0/100% 100% no-repeat;
+  }
+   
+  ion-card.background{
+    --background: url(../../../assets/img/bg3.jpg) 0 0/100% 100% no-repeat;
+  }
+  
+  ion-content.background{
+    --background: url(../../../assets/img/bg3.jpg) 0 0/100% 100% no-repeat;
+  }
+  
+  .cart-icon{
+    position: absolute;
+    top: 16px;
+    color: #0575E6;
   }

@@ -15,23 +15,21 @@
   <ion-card>
     <ion-card-content class="ion-text-center">
 
+    
       <ion-card *ngIf="croppedImage">
-        <img class="p-2" id="image" width="250px" height="250px">
+        <img class="p-2" id="image">
       </ion-card>
 
-      <div *ngIf="!croppedImage">
-        <ion-card *ngFor="let f of cloudFiles">
-          <img class="p-2" src="{{f.url}}">
-        </ion-card>
-      </div>
+      <div *ngIf="!croppedImage && !user.photo">
+        <img class="croppedImage" src="../../assets/img/profile-default.png"  alt="">
+    </div>
+      <ion-card *ngIf="user.photo && !croppedImage">
+       <img class="p-2" src="{{user.photo}}"  alt="">
+      </ion-card>
 
-      <div *ngIf="cloudFiles.length == 0 && !croppedImage">
-        <img class="croppedImage" height="160px" width="160px" src="../../assets/img/profile-default.png">
-      </div>
-
-      <ion-button (click)="chooseImage()" class="butn" size="small" shape="round">
+      <ion-button class="butn" (click)="chooseImage()"  size="small" shape="round">
         <ion-icon slot="start" name="image-outline"></ion-icon>
-        <div style="font-size: 12px; color: white;">Cambiar Foto</div>
+        <div style="font-size: 12px; color: white;">Cambiar Foto</div> 
       </ion-button>
 
       <ion-item lines="none" *ngIf="isUploadStart" style="margin-top: 30px;">
