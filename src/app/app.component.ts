@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { User } from "./models/models.model";
-import { faTruck, faStore, faUserShield } from "@fortawesome/free-solid-svg-icons";
+import { faTruck, faStore, faUserShield, faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
 import Swal from 'sweetalert2'
 import { CartService } from './services/cart.service';
 import { StoreCartModalPage } from './pages/store-cart-modal/store-cart-modal.page';
@@ -28,6 +28,7 @@ export class AppComponent {
   faTruck = faTruck;
   faStore = faStore;
   faUserShield = faUserShield;
+  faMapMarkedAlt = faMapMarkedAlt;
   orders;
   reload: boolean;
   notificationsCounter;
