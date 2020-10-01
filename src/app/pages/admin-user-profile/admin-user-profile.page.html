@@ -9,6 +9,14 @@
       </ion-button>
     </ion-buttons>
 
+    <ion-buttons *ngIf="user.role == 'admin'" slot="start">
+      <ion-button (click)="userList()">
+        <div style="font-size: 25px;">
+          <ion-icon color="light" name="arrow-back"></ion-icon>
+        </div>
+      </ion-button>
+    </ion-buttons>
+
     <ion-buttons *ngIf="user.role == isDelivery" slot="start">
       <ion-button (click)="deliveryList()">
         <div style="font-size: 25px;">

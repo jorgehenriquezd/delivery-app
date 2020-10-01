@@ -44,9 +44,9 @@
             <ion-card class="ion-text-center background">
               <ion-card-header>
 
-                <div (click)="confirmTakeSale(sale.date, sale.client, user.name, sale.clientToken)" class="ion-activatable ripple-parent">
+                <div  class="ion-activatable ripple-parent">
 
-                  <img class="ion-no-padding" src="../../../assets/img/deliverywait.png" alt="">
+                  <img (click)="confirmTakeSale(sale.date, sale.client, user.name, sale.clientToken)" class="ion-no-padding" src="../../../assets/img/deliverywait.png" alt="">
                   <ion-ripple-effect type="unbounded"></ion-ripple-effect>
                 </div>
                 <br>

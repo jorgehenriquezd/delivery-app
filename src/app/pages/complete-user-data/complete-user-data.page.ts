@@ -195,16 +195,7 @@ export class CompleteUserDataPage implements OnInit {
         return false;
       }
   
-     if(this.user.phonenumber.toString().length < 10){
-      this.showToast('Introduzca un número de teléfono válido: El número debe contener 11 dígitos');
-      return false;
-     }
-  
-     if(this.user.phonenumber.toString().length > 10){
-      this.showToast('Introduzca un número de teléfono válido: El número debe contener 11 dígitos');
-      return false;
-     }
-  
+      
       if(!this.user.address){
         this.showToast('Introduzca una dirección');
         return false;

@@ -238,8 +238,7 @@ export class AppComponent {
   }
 
   RemoveTopics(){
-    this.onesignal.getTags().then(tags=>{
-      alert(JSON.stringify(tags))
+    this.onesignal.getTags().then(tags=>{     
       if(tags.admin === "si")
       this.onesignal.sendTag("admin","no");
     })

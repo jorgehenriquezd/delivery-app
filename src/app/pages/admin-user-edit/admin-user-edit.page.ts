@@ -180,7 +180,8 @@ export class AdminUserEditPage implements OnInit {
       var removePurchases = users.update({
        purchases: firebase.firestore.FieldValue.delete(),
        onWait: false,
-       orders: 0
+       orders: 0,
+       admin: firebase.firestore.FieldValue.delete()
       });
         }
 
@@ -190,12 +191,18 @@ export class AdminUserEditPage implements OnInit {
       var removePurchases = users.update({
        purchases: 0,
        onWait: firebase.firestore.FieldValue.delete(),
-       orders: firebase.firestore.FieldValue.delete()
+       orders: firebase.firestore.FieldValue.delete(),
+       admin: firebase.firestore.FieldValue.delete()
       });
         }
 
 
         if(this.user.role == 'admin'){
+
+          await this.firestore.doc('users/' + this.id).update({
+            admin: true               
+          });
+
           var users = this.firestore.collection('users').doc(this.id);
 
       var removePurchases = users.update({
@@ -228,16 +235,6 @@ export class AdminUserEditPage implements OnInit {
       this.showToast('Introduzca un número de teléfono');
       return false;
     } 
-
-   if(this.user.phonenumber.toString().length < 10){
-    this.showToast('Introduzca un número de teléfono válido: El número debe contener 11 dígitos');
-    return false;
-   }
-
-   if(this.user.phonenumber.toString().length > 10){
-    this.showToast('Introduzca un número de teléfono válido: El número debe contener 11 dígitos');
-    return false;
-   }
 
     if (!this.user.address) {
       this.showToast('Introduzca una dirección');

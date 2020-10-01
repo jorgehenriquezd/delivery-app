@@ -13,7 +13,7 @@ export class AdminUserListPage implements OnInit {
 
   users: any;
   result = '';
- 
+ admin: any;
   constructor(private loadingCtrl: LoadingController,   
     private db: AngularFirestore,
     private router: Router,
@@ -55,6 +55,21 @@ doRefresh(event){
         .snapshotChanges()
         .subscribe(data => {
           this.users = data.map(e => {
+            return {
+              id: e.payload.doc.id,
+              name: e.payload.doc.data()['name'],          
+              address: e.payload.doc.data()['address'],
+              photo: e.payload.doc.data()['photo'],
+              purchases: e.payload.doc.data()['purchases']
+            }
+          });
+          loader.dismiss();
+        });
+
+        this.db.collection('users', ref => ref.where('admin','==', true))
+        .snapshotChanges()
+        .subscribe(data => {
+          this.admin = data.map(e => {
             return {
               id: e.payload.doc.id,
               name: e.payload.doc.data()['name'],          

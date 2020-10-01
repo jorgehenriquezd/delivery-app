@@ -118,10 +118,7 @@ const routes: Routes = [
   },
   {
     path: 'store-products-all',
-    loadChildren: () => import('./pages/store-products-all/store-products-all.module').then( m => m.StoreProductsAllPageModule)
-  },   {
-    path: 'maps',
-    loadChildren: () => import('./pages/maps/maps.module').then( m => m.MapsPageModule)
+    loadChildren: () => import('./pages/store-products-all/store-products-all.module').then( m => m.StoreProductsAllPageModule), canActivate: [NoAuthGuard]
   }
  
 ];

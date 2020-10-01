@@ -22,7 +22,31 @@
 
   <ion-list>
 
-    <div *ngFor="let user of users | userFilter: result">
+   
+    <div *ngFor="let a of admin | userFilter: result">
+
+      <div *ngIf="a.photo">
+        <ion-item [routerLink]="['/admin-user-profile/', a.id]" detail>
+          <ion-avatar slot="start">
+            <img src="{{a.photo}}">
+          </ion-avatar>
+          <ion-label> <strong>{{a.name}}</strong>                
+          </ion-label>     
+        </ion-item>
+  </div>
+  
+  <div *ngIf="!a.photo">
+    <ion-item [routerLink]="['/admin-user-profile/', a.id]" detail>
+      <ion-avatar slot="start">
+        <img src="../../../assets/img/profile-default.png">
+      </ion-avatar>
+      <ion-label> <strong>{{a.name}}</strong>        
+      </ion-label>
+    </ion-item>
+  </div>
+    </div>
+    
+ <div *ngFor="let user of users | userFilter: result">
       
       <div *ngIf="user.photo">
       <ion-item [routerLink]="['/admin-user-profile/', user.id]" detail>

@@ -78,6 +78,7 @@ export class UserSaleDetailPage implements OnInit {
     this.iab.create(url);
   }
 
+  
 
   async saleOptionsNoDelivered(id) {
     const actionSheet = await this.actionSheetCtrl.create({ 
