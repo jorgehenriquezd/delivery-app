@@ -1,4 +1,3 @@
-Reglas para Firestore:
 
 service cloud.firestore {
 
